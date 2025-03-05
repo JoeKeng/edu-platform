@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.ClassMapper">
+
+
+<!--    添加班级信息-->
+    <insert id="insert">
+        INSERT INTO class (class_name, department_id, major_id, grade , class_size)
+        VALUES (#{className}, #{departmentId}, #{majorId}, #{grade} , #{classSize});
+    </insert>
+
+<!--    更新班级信息-->
+    <update id="update">
+        UPDATE class
+        SET class_name = #{className},
+            department_id = #{departmentId},
+            major_id = #{majorId},
+            grade = #{grade},
+            class_size = #{classSize}
+        WHERE class_id = #{classId};
+    </update>
+    <!--    删除班级信息-->
+    <delete id="delete">
+<!--        当前班级下有学生，无法删除-->
+        DELETE FROM class WHERE class_id = #{id} AND class_id NOT IN (SELECT class_id FROM student WHERE is_deleted = 0);
+    </delete>
+
+    <!-- 新增SQL：添加学生到班级 -->
+    <insert id="addStudentToClass">
+        UPDATE student
+        SET class_id = #{classId},
+            department_id = (select department_id from class where class_id = #{classId}),
+            major_id = (select major_id from class where class_id = #{classId})
+        WHERE student_id = #{studentId};
+    </insert>
+
+    <!-- 新增SQL：从班级移除学生 -->
+    <update id="removeStudentFromClass">
+        UPDATE student
+        SET class_id = NULL,
+            department_id = NULL,
+            major_id = NULL
+        WHERE student_id = #{studentId} AND class_id = #{classId};
+    </update>
+
+    <select id="page" resultType="com.edusystem.model.Class">
+        SELECT * FROM class
+        <where>
+            <if test="className != null and className != ''">
+                class_name like concat('%',#{className},'%')
+            </if>
+            <if test="departmentId != null">
+                and department_id = #{departmentId}
+            </if>
+            <if test="majorId != null">
+                and major_id = #{majorId}
+            </if>
+            <if test="grade != null and grade != ''">
+                and grade = #{grade}
+            </if>
+        </where> order by class.updated_at desc
+    </select>
+
+    <select id="findById" resultType="com.edusystem.model.Class">
+        SELECT * FROM class WHERE class_id = #{id} AND is_deleted = 0;
+    </select>
+<!--    查询所有班级信息-->
+    <select id="lists" resultType="com.edusystem.model.Class">
+        SELECT * FROM class WHERE is_deleted = 0;
+    </select>
+
+</mapper>

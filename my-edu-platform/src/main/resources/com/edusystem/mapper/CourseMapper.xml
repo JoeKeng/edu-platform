@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.CourseMapper">
+
+    <!-- 查询课程（支持分页 & 搜索） -->
+    <select id="queryCourses" resultType="com.edusystem.model.Course">
+        SELECT * FROM course WHERE is_deleted = 0
+        <if test="courseName != null and courseName != ''">
+            AND course_name LIKE CONCAT('%', #{courseName}, '%')
+        </if>
+        <if test="teacherId != null">
+            AND teacher_id = #{teacherId}
+        </if>
+        <if test="departmentId != null">
+            AND department_id = #{departmentId}
+        </if>
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 根据 ID 查询课程 -->
+    <select id="getCourseById" resultType="com.edusystem.model.Course">
+        SELECT * FROM course WHERE course_id = #{courseId} AND is_deleted = 0
+    </select>
+
+    <!-- 插入课程 -->
+    <insert id="addCourse" useGeneratedKeys="true" keyProperty="courseId">
+        INSERT INTO course (course_name, course_code, category_id,department_id, description, credits, syllabus, cover, start_date, end_date, enrollment_limit)
+        VALUES (#{courseName}, #{courseCode},#{categoryId}, #{departmentId}, #{description}, #{credits}, #{syllabus}, #{cover}, #{startDate}, #{endDate}, #{enrollmentLimit})
+    </insert>
+
+    <!-- 更新课程 -->
+    <update id="updateCourse">
+        UPDATE course SET course_name = #{courseName}, course_code = #{courseCode}, category_id = #{categoryId},
+                          department_id = #{departmentId}, description = #{description}, credits = #{credits}, syllabus = #{syllabus},
+                          cover = #{cover}, start_date = #{startDate}, end_date = #{endDate}, enrollment_limit = #{enrollmentLimit}
+        WHERE course_id = #{courseId}
+    </update>
+
+    <!-- 逻辑删除课程 -->
+    <update id="deleteCourse">
+        UPDATE course SET is_deleted = 1 WHERE course_id = #{courseId}
+    </update>
+
+    <!-- 查询课程关联的班级 -->
+    <select id="getCourseClasses" resultType="int">
+        SELECT class_id FROM course_class WHERE course_id = #{courseId} AND is_deleted = 0
+    </select>
+    <!-- 查询所有课程   -->
+    <select id="getAllCourses" resultType="com.edusystem.model.Course">
+        SELECT * FROM course WHERE is_deleted = 0
+    </select>
+
+    <!-- 绑定课程到班级 -->
+    <insert id="addCourseClass">
+        INSERT INTO course_class (course_id, class_id) VALUES (#{courseId}, #{classId})
+    </insert>
+
+    <!-- 解绑课程和班级 -->
+    <delete id="removeCourseClass">
+        DELETE FROM course_class WHERE course_id = #{courseId} AND class_id = #{classId}
+    </delete>
+
+<!--    查询热门课程-->
+    <select id="getPopularCourses" resultType="com.edusystem.model.Course">
+        SELECT * FROM course WHERE is_deleted = 0 ORDER BY enrollment_count DESC LIMIT 5
+    </select>
+
+    <!-- 绑定课程到教师 -->
+    <insert id="addCourseTeacher">
+        INSERT INTO course_teacher (course_id, teacher_id) VALUES (#{courseId}, #{teacherId})
+    </insert>
+
+    <!-- 解绑课程和教师 -->
+    <delete id="removeCourseTeacher">
+        DELETE FROM course_teacher WHERE course_id = #{courseId} AND teacher_id = #{teacherId}
+    </delete>
+<!--    解绑课程所有教师-->
+    <delete id="deleteCourseTeachers">
+        DELETE FROM course_teacher WHERE course_id = #{courseId}
+    </delete>
+<!--    解绑课程所有班级-->
+    <delete id="deleteCourseClasses">
+        DELETE FROM course_class WHERE course_id = #{courseId}
+    </delete>
+
+    <!-- 查询课程关联的教师 -->
+    <select id="getCourseTeachers" resultType="long">
+        SELECT teacher_id FROM course_teacher WHERE course_id = #{courseId}
+    </select>
+</mapper>

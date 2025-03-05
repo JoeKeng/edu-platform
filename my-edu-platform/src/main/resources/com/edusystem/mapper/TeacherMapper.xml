@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edusystem.mapper.TeacherMapper">
+
+<!--    根据id查询教师信息-->
+    <select id="getTeacherById" parameterType="int" resultType="com.edusystem.model.Teacher">
+        SELECT * FROM teacher WHERE user_id = #{userId} AND is_deleted = 0
+    </select>
+<!--    根据userId查询教师id-->
+    <select id="getTeacherIdByUserId" resultType="java.lang.Integer">
+        SELECT teacher_id FROM teacher WHERE user_id = #{userId} AND is_deleted = 0
+    </select>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edusystem.mapper.StudentMapper">
+<!--    删除学生-->
+    <delete id="deleteRealStudent">
+        DELETE FROM student WHERE student_id = #{studentId} AND is_deleted = 0;
+    </delete>
+
+    <!-- 查询所有未删除的学生 -->
+    <select id="getAllStudents" resultType="com.edusystem.model.Student">
+        SELECT * FROM student WHERE is_deleted = 0;
+    </select>
+
+    <!-- 根据 ID 查询学生 -->
+    <select id="getStudentById" parameterType="Long" resultType="com.edusystem.model.Student">
+        SELECT * FROM student WHERE student_id = #{studentId} AND is_deleted = 0;
+    </select>
+
+
+<!--    分页查询-->
+    <select id="page" resultType="com.edusystem.model.Student">
+        SELECT * FROM student
+        <where>
+            <if test="studentNo != null and studentNo != ''">
+                student_no like concat('%',#{studentNo},'%')
+            </if>
+            <if test="studentName != null and studentName != ''">
+                and student_name like concat('%',#{studentName},'%')
+            </if>
+            <if test="gender != null">
+                and gender = #{gender}
+            </if>
+            <if test="departmentId != null">
+                and department_id = #{departmentId}
+            </if>
+            <if test="majorId != null">
+                and major_id = #{majorId}
+            </if>
+            <if test="classId != null">
+                and class_id = #{classId}
+            </if>
+
+        </where>
+    </select>
+<!--        根据用户id查询学生id-->
+    <select id="getStudentIdByUserId" resultType="java.lang.Integer">
+        SELECT student_id FROM student WHERE user_id = #{userId} AND is_deleted = 0;
+    </select>
+
+    <!-- 添加学生 -->
+    <insert id="insertStudent" useGeneratedKeys="true" keyProperty="studentId">
+        INSERT INTO student (user_id, student_no, student_name, department_id, class_id, major_id , student_photo)
+        VALUES (#{userId}, #{studentNo}, #{studentName}, #{departmentId}, #{classId}, #{majorId} , #{studentPhoto});
+    </insert>
+
+    <!-- 更新学生信息 -->
+    <update id="updateStudent">
+        UPDATE student
+        SET student_no = #{studentNo},
+            student_name = #{studentName},
+            department_id = #{departmentId},
+            class_id = #{classId},
+            major_id = #{majorId}
+        WHERE student_id = #{studentId} AND is_deleted = 0;
+    </update>
+
+    <!-- 逻辑删除学生 -->
+    <update id="deleteStudent">
+        UPDATE student SET is_deleted = 1 WHERE student_id = #{studentId};
+    </update>
+
+</mapper>

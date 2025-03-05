@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.CourseResourceMapper">
+
+    <!-- 插入课程资源 -->
+    <insert id="insert" parameterType="com.edusystem.model.CourseResource">
+        INSERT INTO course_resource (course_id, chapter_id, resource_name, resource_type, resource_url,
+                                     upload_user_id, upload_time, file_size, description, is_public,
+                                     download_count, created_at, updated_at)
+        VALUES (#{courseId}, #{chapterId}, #{resourceName}, #{resourceType}, #{resourceUrl},
+                #{uploadUserId}, NOW(), #{fileSize}, #{description}, #{isPublic},
+                #{downloadCount}, NOW(), NOW())
+    </insert>
+
+    <!-- 更新课程资源 -->
+    <update id="update" parameterType="com.edusystem.model.CourseResource">
+        UPDATE course_resource
+        SET course_id = #{courseId}, chapter_id = #{chapterId}, resource_name = #{resourceName},
+            resource_type = #{resourceType}, resource_url = #{resourceUrl}, upload_user_id = #{uploadUserId},
+            file_size = #{fileSize}, description = #{description}, is_public = #{isPublic},
+            download_count = #{downloadCount}, updated_at = NOW()
+        WHERE resource_id = #{resourceId}
+    </update>
+
+    <!-- 删除课程资源 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM course_resource WHERE resource_id = #{resourceId}
+    </delete>
+
+    <!-- 通过ID查询课程资源 -->
+    <select id="findById" parameterType="int" resultType="com.edusystem.model.CourseResource">
+        SELECT * FROM course_resource WHERE resource_id = #{resourceId}
+    </select>
+
+    <!-- 查询某个课程下的所有资源 -->
+    <select id="findByCourseId" parameterType="int" resultType="com.edusystem.model.CourseResource">
+        SELECT * FROM course_resource WHERE course_id = #{courseId} ORDER BY created_at DESC
+    </select>
+
+    <!-- 查询某个章节下的所有资源 -->
+    <select id="findByChapterId" parameterType="int" resultType="com.edusystem.model.CourseResource">
+        SELECT * FROM course_resource WHERE chapter_id = #{chapterId} ORDER BY created_at DESC
+    </select>
+
+</mapper>

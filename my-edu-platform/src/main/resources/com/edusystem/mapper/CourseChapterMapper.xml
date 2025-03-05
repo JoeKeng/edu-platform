@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.CourseChapterMapper">
+
+    <!-- 插入章节 -->
+    <insert id="insert" parameterType="com.edusystem.model.CourseChapter">
+        INSERT INTO course_chapter (course_id, parent_id, chapter_number, chapter_title, description, created_at, updated_at)
+        VALUES (#{courseId}, #{parentId}, #{chapterNumber}, #{chapterTitle}, #{description}, NOW(), NOW())
+    </insert>
+
+    <!-- 更新章节 -->
+    <update id="update" parameterType="com.edusystem.model.CourseChapter">
+        UPDATE course_chapter
+        SET course_id = #{courseId}, parent_id = #{parentId}, chapter_number = #{chapterNumber},
+            chapter_title = #{chapterTitle}, description = #{description}, updated_at = NOW()
+        WHERE chapter_id = #{chapterId}
+    </update>
+
+    <!-- 删除章节 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM course_chapter WHERE chapter_id = #{chapterId}
+    </delete>
+
+    <!-- 通过ID查询章节 -->
+    <select id="findById" parameterType="int" resultType="com.edusystem.model.CourseChapter">
+        SELECT * FROM course_chapter WHERE chapter_id = #{chapterId}
+    </select>
+
+    <!-- 查询课程的所有章节 -->
+    <select id="findByCourseId" parameterType="int" resultType="com.edusystem.model.CourseChapter">
+        SELECT * FROM course_chapter WHERE course_id = #{courseId} ORDER BY chapter_number
+    </select>
+
+</mapper>
