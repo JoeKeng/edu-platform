@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
 
 
     public Integer getStudentId(Integer userId) {
-        return studentMapper.getStudentIdByUserId(userId);
+        return (int) studentMapper.getStudentIdByUserId(userId);
     }
 
     public Integer getTeacherId(Integer userId) {

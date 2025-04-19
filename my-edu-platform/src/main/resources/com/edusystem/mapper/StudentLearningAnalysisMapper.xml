@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.StudentLearningAnalysisMapper">
+    
+    <resultMap id="BaseResultMap" type="com.edusystem.model.StudentLearningAnalysis">
+        <id column="id" property="id" />
+        <result column="student_id" property="studentId" />
+        <result column="analysis_type" property="analysisType" />
+        <result column="learning_habit_data" property="learningHabitData" typeHandler="com.edusystem.handler.JsonTypeHandler" />
+        <result column="learning_progress_data" property="learningProgressData" typeHandler="com.edusystem.handler.JsonTypeHandler" />
+        <result column="strength_weakness_data" property="strengthWeaknessData" typeHandler="com.edusystem.handler.JsonTypeHandler" />
+        <result column="recommendations" property="recommendations" typeHandler="com.edusystem.handler.JsonTypeHandler" />
+        <result column="analysis_time" property="analysisTime" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, student_id, analysis_type, learning_habit_data, learning_progress_data, 
+        strength_weakness_data, recommendations, analysis_time, created_at, updated_at, is_deleted
+    </sql>
+    
+    <insert id="insert" parameterType="com.edusystem.model.StudentLearningAnalysis" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_learning_analysis (
+            student_id, analysis_type, learning_habit_data, learning_progress_data, 
+            strength_weakness_data, recommendations, analysis_time, created_at, updated_at, is_deleted
+        ) VALUES (
+            #{studentId}, #{analysisType}, #{learningHabitData, typeHandler=com.edusystem.handler.JsonTypeHandler}, 
+            #{learningProgressData, typeHandler=com.edusystem.handler.JsonTypeHandler}, 
+            #{strengthWeaknessData, typeHandler=com.edusystem.handler.JsonTypeHandler}, 
+            #{recommendations, typeHandler=com.edusystem.handler.JsonTypeHandler}, 
+            #{analysisTime}, #{createdAt}, #{updatedAt}, #{isDeleted}
+        )
+    </insert>
+    
+    <update id="update" parameterType="com.edusystem.model.StudentLearningAnalysis">
+        UPDATE student_learning_analysis
+        SET 
+            learning_habit_data = #{learningHabitData, typeHandler=com.edusystem.handler.JsonTypeHandler},
+            learning_progress_data = #{learningProgressData, typeHandler=com.edusystem.handler.JsonTypeHandler},
+            strength_weakness_data = #{strengthWeaknessData, typeHandler=com.edusystem.handler.JsonTypeHandler},
+            recommendations = #{recommendations, typeHandler=com.edusystem.handler.JsonTypeHandler},
+            analysis_time = #{analysisTime},
+            updated_at = #{updatedAt}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+    
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM student_learning_analysis
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+    
+    <select id="selectByStudentIdAndType" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM student_learning_analysis
+        WHERE student_id = #{studentId}
+        <if test="analysisType != null">
+            AND analysis_type = #{analysisType}
+        </if>
+        AND is_deleted = 0
+        ORDER BY analysis_time DESC
+        LIMIT 1
+    </select>
+    
+    <select id="selectByStudentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM student_learning_analysis
+        WHERE student_id = #{studentId}
+        <if test="startTime != null">
+            AND analysis_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND analysis_time &lt;= #{endTime}
+        </if>
+        AND is_deleted = 0
+        ORDER BY analysis_time DESC
+    </select>
+    
+    <select id="selectByClassId" resultMap="BaseResultMap">
+        SELECT a.*
+        FROM student_learning_analysis a
+        JOIN student s ON a.student_id = s.student_id
+        WHERE s.class_id = #{classId}
+        <if test="analysisType != null">
+            AND a.analysis_type = #{analysisType}
+        </if>
+        <if test="startTime != null">
+            AND a.analysis_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND a.analysis_time &lt;= #{endTime}
+        </if>
+        AND a.is_deleted = 0
+        ORDER BY a.analysis_time DESC
+    </select>
+</mapper>

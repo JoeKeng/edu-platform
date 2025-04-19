@@ -24,4 +24,11 @@ public interface CourseService {
     Result addCourseToTeacher(Integer courseId, Long teacherId);
 
     Result removeCourseFromTeacher(Integer courseId, Long teacherId);
+    
+    /**
+     * 根据学生ID获取所有课程
+     * @param studentId 学生ID
+     * @return 课程列表
+     */
+    Result getCoursesByStudentId(Long studentId);
 }

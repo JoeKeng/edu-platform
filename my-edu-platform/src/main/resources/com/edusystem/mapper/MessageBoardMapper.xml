@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.MessageBoardMapper">
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        m.id, m.user_id, m.content, m.created_at, m.parent_id, m.status, m.module_type, m.module_id, m.is_deleted,
+        u.username, u.image as userImage, u.role as userRole
+    </sql>
+
+    <!-- 添加留言 -->
+    <insert id="insert" parameterType="com.edusystem.model.MessageBoard" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO message_board (user_id, content, parent_id, status, module_type, module_id)
+        VALUES (#{userId}, #{content}, #{parentId}, #{status}, #{moduleType}, #{moduleId})
+    </insert>
+
+    <!-- 根据ID查询留言 -->
+    <select id="selectById" resultType="com.edusystem.model.MessageBoard">
+        SELECT <include refid="Base_Column_List"/>
+        FROM message_board m
+        LEFT JOIN user u ON m.user_id = u.user_id
+        WHERE m.id = #{id} AND m.is_deleted = 0
+    </select>
+
+    <!-- 根据模块类型和模块ID查询留言列表 -->
+    <select id="selectByModule" resultType="com.edusystem.model.MessageBoard">
+        SELECT <include refid="Base_Column_List"/>
+        FROM message_board m
+        LEFT JOIN user u ON m.user_id = u.user_id
+        WHERE m.module_type = #{moduleType} AND m.module_id = #{moduleId}
+        AND m.parent_id IS NULL AND m.is_deleted = 0 AND m.status = 1
+        ORDER BY m.created_at DESC
+    </select>
+
+    <!-- 根据父ID查询回复列表 -->
+    <select id="selectRepliesByParentId" resultType="com.edusystem.model.MessageBoard">
+        SELECT <include refid="Base_Column_List"/>
+        FROM message_board m
+        LEFT JOIN user u ON m.user_id = u.user_id
+        WHERE m.parent_id = #{parentId} AND m.is_deleted = 0 AND m.status = 1
+        ORDER BY m.created_at ASC
+    </select>
+
+    <!-- 更新留言状态 -->
+    <update id="updateStatus">
+        UPDATE message_board SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <!-- 逻辑删除留言 -->
+    <update id="deleteById">
+        UPDATE message_board SET is_deleted = 1 WHERE id = #{id}
+    </update>
+
+    <!-- 查询待审核的留言 -->
+    <select id="selectPendingMessages" resultType="com.edusystem.model.MessageBoard">
+        SELECT <include refid="Base_Column_List"/>
+        FROM message_board m
+        LEFT JOIN user u ON m.user_id = u.user_id
+        WHERE m.status = 0 AND m.is_deleted = 0
+        ORDER BY m.created_at ASC
+    </select>
+
+    <!-- 根据用户ID查询该用户的所有留言 -->
+    <select id="selectByUserId" resultType="com.edusystem.model.MessageBoard">
+        SELECT <include refid="Base_Column_List"/>
+        FROM message_board m
+        LEFT JOIN user u ON m.user_id = u.user_id
+        WHERE m.user_id = #{userId} AND m.is_deleted = 0
+        ORDER BY m.created_at DESC
+    </select>
+</mapper>

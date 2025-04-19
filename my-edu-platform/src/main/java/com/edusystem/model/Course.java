@@ -1,10 +1,15 @@
 package com.edusystem.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Course {
     private Integer courseId; // 课程ID，唯一标识课程
     private String courseName; // 课程名称
@@ -24,4 +29,7 @@ public class Course {
     private Integer enrollmentLimit; // 选课人数上限
     private List<Long> teacherIds; // 多个教师ID列表
     private List<Integer> classIds; // 关联班级 ID 列表
+
+
+
 }

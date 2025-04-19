@@ -1,4 +1,4 @@
-package dao;
+package com.edusystem.dto;
 
 import lombok.Data;
 

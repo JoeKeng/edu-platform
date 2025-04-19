@@ -88,4 +88,23 @@
     <select id="getCourseTeachers" resultType="long">
         SELECT teacher_id FROM course_teacher WHERE course_id = #{courseId}
     </select>
+    <!-- 根据学生ID获取班级ID -->
+    <select id="getClassIdByStudentId" resultType="java.lang.Integer">
+        SELECT class_id FROM student WHERE student_id = #{studentId} AND is_deleted = 0
+    </select>
+    
+    <!-- 根据班级ID获取课程列表 -->
+    <select id="getCoursesByClassId" resultType="com.edusystem.model.Course">
+        SELECT c.* FROM course c
+        JOIN course_class cc ON c.course_id = cc.course_id
+        WHERE cc.class_id = #{classId} AND c.is_deleted = 0
+        ORDER BY c.created_at DESC
+    </select>
+
+    <select id="batchGetCourses" resultType="com.edusystem.model.Course">
+        SELECT * FROM course WHERE course_id IN
+        <foreach collection="course" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

@@ -1,5 +1,6 @@
 package com.edusystem.mapper;
 
+import com.edusystem.dto.NewAssignmentDTO;
 import com.edusystem.model.Assignment;
 import org.apache.ibatis.annotations.*;
 
@@ -8,10 +9,10 @@ import java.util.List;
 @Mapper
 public interface AssignmentMapper {
 
-    @Insert("INSERT INTO assignment (teacher_id, course_id, title, description, max_attempts, start_time, end_time) " +
-            "VALUES (#{teacherId}, #{courseId}, #{title}, #{description}, #{maxAttempts}, #{startTime}, #{endTime})")
+    @Insert("INSERT INTO assignment (teacher_id, course_id, chapter_id, title, description, max_attempts, start_time, end_time) " +
+            "VALUES (#{teacherId}, #{courseId},#{chapterId} , #{title}, #{description}, #{maxAttempts}, #{startTime}, #{endTime})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
-    int insert(Assignment assignment);
+    int insert(NewAssignmentDTO NewAssignmentDTO);
 
     @Select("SELECT * FROM assignment WHERE id = #{id}")
     Assignment getById(Integer id);
@@ -33,5 +34,8 @@ public interface AssignmentMapper {
 
     @Select("SELECT * FROM assignment WHERE chapter_id = #{chapterId}")
     List<Assignment> getByChapterId(Integer chapterId);
+
+    @Select("SELECT * FROM assignment WHERE teacher_id = #{teacherId} ORDER BY created_at DESC")
+    List<Assignment> findByTeacherId(Long teacherId);
 }
 

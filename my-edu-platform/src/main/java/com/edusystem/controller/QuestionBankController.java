@@ -3,6 +3,8 @@ package com.edusystem.controller;
 import com.edusystem.model.QuestionBank;
 import com.edusystem.model.Result;
 import com.edusystem.service.QuestionBankService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +13,14 @@ import java.util.List;
 
 @Slf4j
 @RestController
+@Tag(name = "题库管理")
 public class QuestionBankController {
 
     @Autowired
     private QuestionBankService questionBankService;
 
     // 添加题目
+    @Operation(summary = "添加题目")
     @PostMapping("/teacher/question/add")
     public Result addQuestion(@RequestBody QuestionBank question) {
         log.info("添加题目 question:{}", question);
@@ -25,6 +29,7 @@ public class QuestionBankController {
     }
 
     // 根据id获取题目
+    @Operation(summary = "根据id获取题目")
     @GetMapping("/question/get/{id}")
     public Result getQuestion(@PathVariable Long id) {
         log.info("根据id获取题目 id:{}", id);
@@ -32,6 +37,7 @@ public class QuestionBankController {
         return question != null ? Result.success(question) : Result.error("未找到题目");
     }
     // 根据课程id和章节id获取题目
+    @Operation(summary = "根据课程id和章节id获取题目")
     @GetMapping("/question/list")
     public Result listQuestions(@RequestParam Integer courseId, @RequestParam Integer chapterId) {
         log.info("根据课程id和章节id获取题目 courseId:{}, chapterId:{}", courseId, chapterId);
@@ -39,7 +45,10 @@ public class QuestionBankController {
         return Result.success(questions);
     }
 
+
+
     // 更新题目
+    @Operation(summary = "更新题目")
     @PutMapping("/teacher/question/update")
     public Result updateQuestion(@RequestBody QuestionBank question) {
         log.info("更新题目 question:{}", question);
@@ -49,6 +58,7 @@ public class QuestionBankController {
 
     // 删除题目
     @DeleteMapping("/teacher/question/delete/{id}")
+    @Operation(summary = "删除题目")
     public Result deleteQuestion(@PathVariable Long id) {
         log.info("删除题目 id:{}", id);
         int result = questionBankService.deleteQuestion(id);

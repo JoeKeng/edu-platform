@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.ExamAnswerMapper">
+    <!-- 插入答题记录 -->
+    <insert id="insert" parameterType="com.edusystem.model.ExamAnswer" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO exam_answer (
+            exam_id, question_id, student_id, answer,
+             score, ai_feedback, teacher_feedback,
+            status, submit_time, created_at, updated_at
+        )
+        VALUES (
+            #{examId}, #{questionId}, #{studentId}, #{answer},
+            #{score}, #{aiFeedback}, #{teacherFeedback},
+            #{status}, #{submitTime}, NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 批量插入答题记录 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO exam_answer (
+            exam_id, question_id, student_id, answer_content,
+            is_correct, score, ai_feedback, teacher_feedback,
+            status, submitted_at, created_at, updated_at
+        )
+        VALUES
+        <foreach collection="examAnswers" item="answer" separator=",">
+            (
+                #{answer.examId}, #{answer.questionId}, #{answer.studentId}, #{answer.answerContent},
+                #{answer.isCorrect}, #{answer.score}, #{answer.aiFeedback}, #{answer.teacherFeedback},
+                #{answer.status}, #{answer.submittedAt}, NOW(), NOW()
+            )
+        </foreach>
+    </insert>
+
+    <!-- 更新答题记录 -->
+    <update id="update" parameterType="com.edusystem.model.ExamAnswer">
+        UPDATE exam_answer
+        SET answer = #{answer},
+            is_correct = #{isCorrect},
+            score = #{score},
+            ai_feedback = #{aiFeedback},
+            teacher_feedback = #{teacherFeedback},
+            status = #{status},
+            explanation = #{explanation},
+            submit_time = #{submitTime},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 插入或更新答题记录 -->
+    <insert id="insertOrUpdate">
+        INSERT INTO exam_answer (
+            exam_id, question_id, student_id, answer, 
+            is_correct, score, ai_feedback, teacher_feedback, 
+            status, submit_time, created_at, updated_at
+        ) VALUES (
+            #{examId}, #{questionId}, #{studentId}, #{answer},
+            #{isCorrect}, #{score}, #{aiFeedback}, #{teacherFeedback},
+            #{status}, #{submitTime}, #{createdAt}, #{updatedAt}
+        ) ON DUPLICATE KEY UPDATE 
+            answer = VALUES(answer),
+            is_correct = VALUES(is_correct),
+            score = VALUES(score),
+            ai_feedback = VALUES(ai_feedback),
+            teacher_feedback = VALUES(teacher_feedback),
+            status = VALUES(status),
+            submit_time = VALUES(submit_time),
+            updated_at = VALUES(updated_at)
+    </insert>
+
+    <!-- 根据考试ID和学生ID查询所有答题记录 -->
+    <select id="selectByExamAndStudent" resultType="com.edusystem.model.ExamAnswer">
+        SELECT *
+        FROM exam_answer
+        WHERE exam_id = #{examId}
+        AND student_id = #{studentId}
+    </select>
+
+    <!-- 根据考试ID和题目ID查询答题记录 -->
+    <select id="selectByExamAndQuestion" resultType="com.edusystem.model.ExamAnswer">
+        SELECT *
+        FROM exam_answer
+        WHERE exam_id = #{examId}
+        AND question_id = #{questionId}
+    </select>
+
+<!--    &lt;!&ndash; 更新提交状态 &ndash;&gt;-->
+<!--    <update id="updateSubmitStatus">-->
+<!--        UPDATE exam_answer-->
+<!--        SET status = -->
+<!--                WHEN #{isSubmitted} = true THEN 'SUBMITTED'-->
+<!--                ELSE 'SAVED'-->
+<!--            END,-->
+<!--            submit_time = CASE-->
+<!--                WHEN #{isSubmitted} = true THEN NOW()-->
+<!--                ELSE submit_time-->
+<!--            END,-->
+<!--            updated_at = NOW()-->
+<!--        WHERE exam_id = #{examId}-->
+<!--        AND student_id = #{studentId}-->
+<!--    </update>-->
+
+    <!-- 获取学生在某场考试中的答题进度 -->
+    <select id="getAnsweredCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM exam_answer
+        WHERE exam_id = #{examId}
+        AND student_id = #{studentId}
+        AND answer IS NOT NULL
+    </select>
+
+    <!-- 获取最后保存时间 -->
+    <select id="getLastSaved" resultType="com.edusystem.model.ExamAnswer">
+        SELECT *
+        FROM exam_answer
+        WHERE exam_id = #{examId}
+        AND student_id = #{studentId}
+        ORDER BY updated_at DESC
+        LIMIT 1
+    </select>
+
+    <!-- 删除答题记录 -->
+    <delete id="deleteByExamAndStudent">
+        DELETE FROM exam_answer
+        WHERE exam_id = #{examId}
+        AND student_id = #{studentId}
+    </delete>
+
+    <!-- 批量更新答题状态 -->
+    <update id="batchUpdateStatus">
+        UPDATE exam_answer
+        SET status = #{status},
+            submit_time = CASE
+                WHEN #{status} = '已提交' THEN NOW()
+                ELSE submit_time
+            END,
+            updated_at = NOW()
+        WHERE exam_id = #{examId}
+        AND student_id = #{studentId}
+    </update>
+
+    <!-- 检查是否已提交 -->
+    <select id="isSubmitted" resultType="java.lang.Boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM exam_answer
+            WHERE exam_id = #{examId}
+            AND student_id = #{studentId}
+            AND status = 'SUBMITTED'
+        )
+    </select>
+    <select id="selectByAnswerId" resultType="com.edusystem.model.ExamAnswer">
+        SELECT *
+        FROM exam_answer
+        WHERE id = #{id}
+    </select>
+</mapper>

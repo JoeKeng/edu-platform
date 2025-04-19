@@ -13,8 +13,8 @@
         SELECT * FROM student WHERE is_deleted = 0;
     </select>
 
-    <!-- 根据 ID 查询学生 -->
-    <select id="getStudentById" parameterType="Long" resultType="com.edusystem.model.Student">
+    <!-- 根据 学生ID 查询学生 -->
+    <select id="getStudentByStudentId" parameterType="Long" resultType="com.edusystem.model.Student">
         SELECT * FROM student WHERE student_id = #{studentId} AND is_deleted = 0;
     </select>
 
@@ -45,7 +45,7 @@
         </where>
     </select>
 <!--        根据用户id查询学生id-->
-    <select id="getStudentIdByUserId" resultType="java.lang.Integer">
+    <select id="getStudentIdByUserId" resultType="java.lang.Long">
         SELECT student_id FROM student WHERE user_id = #{userId} AND is_deleted = 0;
     </select>
 
@@ -71,4 +71,10 @@
         UPDATE student SET is_deleted = 1 WHERE student_id = #{studentId};
     </update>
 
+    <!-- 根据班级ID获取学生列表 -->
+    <select id="getStudentsByClassId" resultType="com.edusystem.model.Student">
+        SELECT * FROM student 
+        WHERE class_id = #{classId} AND is_deleted = 0
+        ORDER BY student_no ASC
+    </select>
 </mapper>

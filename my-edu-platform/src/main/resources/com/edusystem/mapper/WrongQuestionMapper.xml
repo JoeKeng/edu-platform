@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.WrongQuestionMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.edusystem.model.WrongQuestion">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="question_id" property="questionId" />
+        <result column="assignment_id" property="assignmentId" />
+        <result column="wrong_answer" property="wrongAnswer" />
+        <result column="correct_answer" property="correctAnswer" />
+        <result column="analysis" property="analysis" />
+        <result column="wrong_type" property="wrongType" />
+        <result column="attempt_count" property="attemptCount" />
+        <result column="first_attempt_score" property="firstAttemptScore" />
+        <result column="last_attempt_score" property="lastAttemptScore" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+    
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, user_id, question_id, assignment_id, wrong_answer, correct_answer, analysis, wrong_type, attempt_count, first_attempt_score, last_attempt_score, created_at, updated_at, is_deleted
+    </sql>
+    
+    <!-- 添加错题记录 -->
+    <insert id="insert" parameterType="com.edusystem.model.WrongQuestion" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO wrong_question (user_id, question_id, assignment_id, wrong_answer, correct_answer, analysis, wrong_type, attempt_count, first_attempt_score, last_attempt_score, created_at, updated_at, is_deleted)
+        VALUES (#{userId}, #{questionId}, #{assignmentId}, #{wrongAnswer}, #{correctAnswer}, #{analysis}, #{wrongType}, #{attemptCount}, #{firstAttemptScore}, #{lastAttemptScore}, NOW(), NOW(), #{isDeleted})
+    </insert>
+    
+    <!-- 根据ID查询错题记录 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM wrong_question
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+    
+    <!-- 查询用户的错题记录列表 -->
+    <select id="selectByStudentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM wrong_question
+        WHERE user_id = #{userId} AND is_deleted = 0
+        ORDER BY created_at DESC
+    </select>
+    
+    <!-- 查询用户特定题目的错题记录 -->
+    <select id="selectByStudentIdAndQuestionId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM wrong_question
+        WHERE user_id = #{studentId} AND question_id = #{examQuestionId} AND is_deleted = 0
+        LIMIT 1
+    </select>
+    
+    <!-- 查询用户特定作业的错题记录 -->
+    <select id="selectByStudentIdAndExamId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM wrong_question
+        WHERE user_id = #{studentId} AND assignment_id = #{examId} AND is_deleted = 0
+        ORDER BY created_at DESC
+    </select>
+    
+    <!-- 更新错题记录 -->
+    <update id="update" parameterType="com.edusystem.model.WrongQuestion">
+        UPDATE wrong_question
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="questionId != null">question_id = #{questionId},</if>
+            <if test="assignmentId != null">assignment_id = #{assignmentId},</if>
+            <if test="wrongAnswer != null">wrong_answer = #{wrongAnswer},</if>
+            <if test="correctAnswer != null">correct_answer = #{correctAnswer},</if>
+            <if test="analysis != null">analysis = #{analysis},</if>
+            <if test="wrongType != null">wrong_type = #{wrongType},</if>
+            <if test="attemptCount != null">attempt_count = #{attemptCount},</if>
+            <if test="firstAttemptScore != null">first_attempt_score = #{firstAttemptScore},</if>
+            <if test="lastAttemptScore != null">last_attempt_score = #{lastAttemptScore},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+    
+    <!-- 更新错题备注 -->
+    <update id="updateNote">
+        UPDATE wrong_question
+        SET analysis = #{note}, updated_at = NOW()
+        WHERE id = #{wrongId} AND is_deleted = 0
+    </update>
+    
+    <!-- 增加错题出现次数 -->
+    <update id="increaseErrorCount">
+        UPDATE wrong_question
+        SET attempt_count = attempt_count + 1, updated_at = NOW()
+        WHERE user_id = #{studentId} AND question_id = #{examQuestionId} AND is_deleted = 0
+    </update>
+    
+    <!-- 删除错题记录（逻辑删除） -->
+    <update id="deleteById">
+        UPDATE wrong_question
+        SET is_deleted = 1, updated_at = NOW()
+        WHERE id = #{wrongId} AND is_deleted = 0
+    </update>
+    
+    <!-- 统计用户错题数量 -->
+    <select id="countByStudentId" resultType="int">
+        SELECT COUNT(*)
+        FROM wrong_question
+        WHERE user_id = #{studentId} AND is_deleted = 0
+    </select>
+</mapper>

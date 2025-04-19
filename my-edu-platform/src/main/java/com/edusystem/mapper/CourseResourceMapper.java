@@ -3,6 +3,8 @@ package com.edusystem.mapper;
 import com.edusystem.model.CourseResource;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.Arrays;
 import java.util.List;
 
 @Mapper
@@ -18,5 +20,8 @@ public interface CourseResourceMapper {
     List<CourseResource> findByCourseId(@Param("courseId") Integer courseId);
 
     List<CourseResource> findByChapterId(@Param("chapterId") Integer chapterId);
+
+
+    List<CourseResource> batchFindByIds(List<Long> resource);
 }
 

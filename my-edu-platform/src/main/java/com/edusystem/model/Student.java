@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 @Data
 public class Student {
-    private Integer studentId; //学生id
+    private Long studentId; //学生id
     private Integer userId; //用户id
     private String studentNo; //学生编号
     private String studentName; //学生姓名

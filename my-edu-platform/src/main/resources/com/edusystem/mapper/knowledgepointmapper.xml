@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.KnowledgePointMapper">
+    
+    <resultMap id="BaseResultMap" type="com.edusystem.model.KnowledgePoint">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="course_id" property="courseId" />
+        <result column="chapter_id" property="chapterId" />
+        <result column="parent_id" property="parentId" />
+        <result column="description" property="description" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, name, course_id, chapter_id, parent_id, description, created_at, updated_at
+    </sql>
+    
+    <insert id="insert" parameterType="com.edusystem.model.KnowledgePoint" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO knowledge_point (
+            name, course_id, chapter_id, parent_id, description, created_at, updated_at
+        ) VALUES (
+            #{name}, #{courseId}, #{chapterId}, #{parentId}, #{description}, NOW(), NOW()
+        )
+    </insert>
+    
+    <update id="update" parameterType="com.edusystem.model.KnowledgePoint">
+        UPDATE knowledge_point
+        SET 
+            name = #{name},
+            course_id = #{courseId},
+            chapter_id = #{chapterId},
+            parent_id = #{parentId},
+            description = #{description},
+            updated_at = NOW()
+        WHERE 
+            id = #{id}
+    </update>
+    
+    <delete id="delete">
+        DELETE FROM knowledge_point WHERE id = #{id}
+    </delete>
+    
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            knowledge_point
+        WHERE 
+            id = #{id}
+    </select>
+    
+    <select id="selectByCourseId" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            knowledge_point
+        WHERE 
+            course_id = #{courseId}
+        ORDER BY 
+            id
+    </select>
+    
+    <select id="selectByChapterId" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            knowledge_point
+        WHERE 
+            chapter_id = #{chapterId}
+        ORDER BY 
+            id
+    </select>
+    
+    <select id="selectByParentId" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            knowledge_point
+        WHERE 
+            parent_id = #{parentId}
+            <if test="courseId != null">
+            AND course_id = #{courseId}
+            </if>
+        ORDER BY 
+            id
+    </select>
+</mapper>

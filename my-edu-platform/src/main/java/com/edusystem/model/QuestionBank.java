@@ -1,5 +1,6 @@
 package com.edusystem.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.edusystem.handler.ListTypeHandler;
 import lombok.Data;
 import java.util.Date;
@@ -17,10 +18,14 @@ public class QuestionBank {
     private Long teacherId; //出题教师ID
     private String type;//题目类型（如单选/多选/判断等）
     private String questionText;//题目正文内容
+    private Double score;//题目分值
     private String options;//题目选项（JSON格式存储）
     private String correctAnswer;//正确答案（根据题目类型存储不同格式）
     private String analysis;// 题目解析说明
     private String difficulty;//难度等级（如简单/中等/困难）
     private Date createdAt;//题目创建时间
     private Date updatedAt;//题目最后更新时间
+    // 添加知识点关联属性
+    @TableField(exist = false)  // 标记该字段不是数据库表中的字段
+    private List<KnowledgePoint> knowledgePoints;
 }

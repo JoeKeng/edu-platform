@@ -42,5 +42,12 @@
     <select id="findByChapterId" parameterType="int" resultType="com.edusystem.model.CourseResource">
         SELECT * FROM course_resource WHERE chapter_id = #{chapterId} ORDER BY created_at DESC
     </select>
+<!--    批量查询资源-->
+    <select id="batchFindByIds" resultType="com.edusystem.model.CourseResource">
+        SELECT * FROM course_resource WHERE resource_id IN
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 
 </mapper>

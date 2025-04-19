@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.ExamQuestionMapper">
+    <!-- 添加考试题目 -->
+    <insert id="insert" parameterType="com.edusystem.model.ExamQuestion" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO exam_question (
+            exam_id, question_id,score,order_num,question_type
+            ,section,   created_at, updated_at
+        )
+        VALUES (
+            #{examId},#{questionId} ,#{score}, #{orderNum},
+            #{questionType}, #{section},  NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 批量添加考试题目 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO exam_question (
+            exam_id, question_id,score,order_num,question_type
+        ,section,   created_at, updated_at
+        )
+        VALUES
+        <foreach collection="examQuestions" item="question" separator=",">
+            (
+                #{question.examId}, #{question.questionId}, #{question.score},
+                #{question.orderNum}, #{question.questionType}, #{question.section},
+                 NOW(), NOW()
+            )
+        </foreach>
+    </insert>
+
+    <!-- 更新考试题目信息 -->
+    <update id="update" parameterType="com.edusystem.model.ExamQuestion">
+        UPDATE exam_question
+        SET question_type = #{questionType},
+            section = #{section},
+            score = #{score},
+            order_num = #{orderNum},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除考试题目 -->
+    <delete id="deleteById">
+        DELETE FROM exam_question WHERE id = #{id}
+    </delete>
+
+    <!-- 根据考试ID删除所有题目 -->
+    <delete id="deleteByExamId">
+        DELETE FROM exam_question WHERE exam_id = #{examId}
+    </delete>
+
+    <!-- 根据ID获取考试题目信息 -->
+    <select id="getById" resultType="com.edusystem.model.ExamQuestion">
+        SELECT *
+        FROM exam_question
+        WHERE id = #{id}
+    </select>
+
+    <!-- 获取考试的所有题目 -->
+    <select id="getByExamId" resultType="com.edusystem.model.ExamQuestion">
+        SELECT *
+        FROM exam_question
+        WHERE exam_id = #{examId}
+        ORDER BY order_num ASC
+    </select>
+
+    <!-- 根据考试ID和题目类型获取题目 -->
+    <select id="getByExamIdAndType" resultType="com.edusystem.model.ExamQuestion">
+        SELECT *
+        FROM exam_question
+        WHERE exam_id = #{examId}
+        AND question_type = #{questionType}
+        ORDER BY order_num ASC
+    </select>
+<!-- 根据ID查询考试题目信息，与getById功能相同，用于兼容旧版本API -->
+    <select id="selectById" resultType="com.edusystem.model.ExamQuestion">
+        SELECT *
+        FROM exam_question
+        WHERE id = #{id}
+    </select>
+    <!-- 根据考试ID和题目顺序号获取题目信息 -->
+    <select id="selectByOrderNum" resultType="com.edusystem.model.ExamQuestion">
+        SELECT *
+            FROM exam_question
+            WHERE exam_id = #{examId}
+            AND order_num = #{orderNum}
+    </select>
+
+    <!-- 更新题目顺序 -->
+    <update id="updateOrderNum">
+        UPDATE exam_question
+        SET order_num = #{orderNum},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 批量更新题目分值 -->
+    <update id="batchUpdateScore" parameterType="java.util.List">
+        UPDATE exam_question
+        SET score = CASE id
+        <foreach collection="updates" item="item">
+            WHEN #{item.id} THEN #{item.score}
+        </foreach>
+        END,
+        updated_at = NOW()
+        WHERE id IN
+        <foreach collection="updates" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <!-- 更新删除题目后的顺序号 -->
+    <update id="updateOrderNumsAfterDelete">
+        UPDATE exam_question 
+        SET order_num = order_num - 1
+        WHERE exam_id = #{examId} 
+        AND order_num > #{orderNum}
+    </update>
+
+    <!-- 减少指定范围内题目的顺序号 -->
+    <update id="decreaseOrderNum">
+        UPDATE exam_question
+        SET order_num = order_num - 1
+        WHERE exam_id = #{examId}
+        AND order_num BETWEEN #{startOrder} AND #{endOrder}
+    </update>
+
+    <!-- 增加指定范围内题目的顺序号 -->
+    <update id="increaseOrderNum">
+        UPDATE exam_question
+        SET order_num = order_num + 1
+        WHERE exam_id = #{examId}
+        AND order_num BETWEEN #{startOrder} AND #{endOrder}
+    </update>
+    <!-- 获取考试中最大的题目顺序号 -->
+    <select id="getMaxOrderNum" resultType="java.lang.Integer">
+        SELECT MAX(order_num)
+        FROM exam_question
+        WHERE exam_id = #{examId}
+    </select>
+    <select id="getByExamIdAndQuestionId" resultType="com.edusystem.model.ExamQuestion">
+        SELECT *
+        FROM exam_question
+        WHERE exam_id = #{examId}
+        AND question_id = #{questionId}
+    </select>
+</mapper>

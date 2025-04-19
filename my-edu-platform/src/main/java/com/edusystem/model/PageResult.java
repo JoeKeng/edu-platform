@@ -17,4 +17,5 @@ public class PageResult<T> {
     //根据接口文档写属性名
     private Long total;
     private List<T> rows;
+
 }

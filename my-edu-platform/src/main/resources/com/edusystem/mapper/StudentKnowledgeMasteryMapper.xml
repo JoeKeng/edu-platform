@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.StudentKnowledgeMasteryMapper">
+    
+    <resultMap id="BaseResultMap" type="com.edusystem.model.StudentKnowledgeMastery">
+        <id column="id" property="id" />
+        <result column="student_id" property="studentId" />
+        <result column="knowledge_point_id" property="knowledgePointId" />
+        <result column="mastery_level" property="masteryLevel" />
+        <result column="question_count" property="questionCount" />
+        <result column="correct_count" property="correctCount" />
+        <result column="last_practice_time" property="lastPracticeTime" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, student_id, knowledge_point_id, mastery_level, question_count, correct_count,
+        last_practice_time, created_at, updated_at, is_deleted
+    </sql>
+    
+    <insert id="insert" parameterType="com.edusystem.model.StudentKnowledgeMastery" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_knowledge_mastery (
+            student_id, knowledge_point_id, mastery_level, question_count, correct_count,
+            last_practice_time, created_at, updated_at, is_deleted
+        ) VALUES (
+            #{studentId}, #{knowledgePointId}, #{masteryLevel}, #{questionCount}, #{correctCount},
+            #{lastPracticeTime}, #{createdAt}, #{updatedAt}, #{isDeleted}
+        )
+    </insert>
+    
+    <update id="update" parameterType="com.edusystem.model.StudentKnowledgeMastery">
+        UPDATE student_knowledge_mastery
+        SET 
+            mastery_level = #{masteryLevel},
+            question_count = #{questionCount},
+            correct_count = #{correctCount},
+            last_practice_time = #{lastPracticeTime},
+            updated_at = #{updatedAt}
+        WHERE 
+            student_id = #{studentId} AND knowledge_point_id = #{knowledgePointId}
+    </update>
+    
+    <select id="selectByStudentAndKnowledge" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            student_knowledge_mastery
+        WHERE 
+            student_id = #{studentId} 
+            AND knowledge_point_id = #{knowledgePointId}
+            AND is_deleted = 0
+    </select>
+    
+    <select id="selectAllMasteryByStudentId" resultType="java.util.Map">
+        SELECT 
+            skm.knowledge_point_id,
+            kp.name as knowledge_point_name,
+            kp.course_id,
+            c.course_name,
+            skm.mastery_level,
+            skm.question_count,
+            skm.correct_count,
+            skm.last_practice_time
+        FROM 
+            student_knowledge_mastery skm
+        JOIN 
+            knowledge_point kp ON skm.knowledge_point_id = kp.id
+        JOIN 
+            course c ON kp.course_id = c.course_id
+        WHERE 
+            skm.student_id = #{studentId}
+            AND skm.is_deleted = 0
+        ORDER BY 
+            skm.mastery_level DESC
+    </select>
+    
+    <select id="selectCourseMasteryByStudentId" resultType="java.util.Map">
+        SELECT 
+            skm.knowledge_point_id,
+            kp.name as knowledge_point_name,
+            kp.description,
+            skm.mastery_level,
+            skm.question_count,
+            skm.correct_count,
+            CASE 
+                WHEN skm.question_count > 0 THEN (skm.correct_count * 100.0 / skm.question_count)
+                ELSE 0 
+            END as accuracy,
+            skm.last_practice_time
+        FROM 
+            student_knowledge_mastery skm
+        JOIN 
+            knowledge_point kp ON skm.knowledge_point_id = kp.id
+        WHERE 
+            skm.student_id = #{studentId}
+            AND kp.course_id = #{courseId}
+            AND skm.is_deleted = 0
+        ORDER BY 
+            skm.mastery_level DESC
+    </select>
+    
+    <select id="selectByKnowledgePointId" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM 
+            student_knowledge_mastery
+        WHERE 
+            knowledge_point_id = #{knowledgePointId}
+            AND is_deleted = 0
+    </select>
+    
+    <select id="selectByClassId" resultMap="BaseResultMap">
+        SELECT 
+            skm.*
+        FROM 
+            student_knowledge_mastery skm
+        JOIN 
+            student s ON skm.student_id = s.student_id
+        WHERE 
+            s.class_id = #{classId}
+            AND skm.knowledge_point_id = #{knowledgePointId}
+            AND skm.is_deleted = 0
+    </select>
+    
+    <select id="getClassKnowledgePointStats" resultType="java.util.Map">
+        SELECT 
+            AVG(skm.mastery_level) as avg_mastery,
+            MIN(skm.mastery_level) as min_mastery,
+            MAX(skm.mastery_level) as max_mastery,
+            COUNT(DISTINCT skm.student_id) as student_count,
+            SUM(CASE WHEN skm.mastery_level >= 70 THEN 1 ELSE 0 END) as proficient_count
+        FROM 
+            student_knowledge_mastery skm
+        JOIN 
+            student s ON skm.student_id = s.student_id
+        WHERE 
+            s.class_id = #{classId}
+            AND skm.knowledge_point_id = #{knowledgePointId}
+            AND skm.is_deleted = 0
+    </select>
+</mapper>

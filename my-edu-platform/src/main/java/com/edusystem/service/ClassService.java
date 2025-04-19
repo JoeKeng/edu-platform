@@ -23,4 +23,24 @@ public interface ClassService {
 
     // 新增方法：从班级移除学生
     void removeStudentFromClass(Integer classId, Integer studentId);
+    
+    /**
+     * 更新班级人数
+     * @param classId 班级ID
+     */
+    void updateClassSize(Integer classId);
+    
+    /**
+     * 批量更新所有班级人数
+     */
+    void updateAllClassSizes();
+    
+    /**
+     * 获取班级统计信息
+     * @param departmentId 学院ID
+     * @param majorId 专业ID
+     * @param grade 年级
+     * @return 班级统计信息
+     */
+    List<Class> getClassStatistics(Integer departmentId, Integer majorId, String grade);
 }

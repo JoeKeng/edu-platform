@@ -3,6 +3,8 @@ package com.edusystem.controller;
 import com.edusystem.model.CourseChapter;
 import com.edusystem.model.Result;
 import com.edusystem.service.CourseChapterService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +13,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
+@Tag(name = "课程章节管理")
 public class CourseChapterController {
     @Autowired
     private CourseChapterService chapterService;
@@ -18,6 +21,7 @@ public class CourseChapterController {
     /**
      * 添加章节信息
      */
+    @Operation(summary = "添加章节信息")
     @PostMapping("/teacher/course/chapter/add")
     public Result addChapter(@RequestBody CourseChapter chapter) {
         log.info("添加章节信息：{}", chapter);
@@ -36,6 +40,7 @@ public class CourseChapterController {
     }
 
     // 修改章节信息
+    @Operation(summary = "修改章节信息")
     @PutMapping("/teacher/course/chapter/update")
     public Result updateChapter(@RequestBody CourseChapter chapter) {
         log.info("修改章节信息：{}", chapter);
@@ -44,6 +49,7 @@ public class CourseChapterController {
     }
 
     // 删除章节信息
+    @Operation(summary = "删除章节信息")
     @DeleteMapping("/teacher/course/chapter/delete/{id}")
     public Result deleteChapter(@PathVariable Integer id) {
         log.info("删除章节信息，id：{}", id);
@@ -51,6 +57,7 @@ public class CourseChapterController {
         return Result.success();
     }
     // 根据id查询章节信息
+    @Operation(summary = "根据id查询章节信息")
     @GetMapping("/common/chapter/{id}")
     public Result getChapterById(@PathVariable Integer id) {
         log.info("根据id查询章节信息，id：{}", id);
@@ -58,6 +65,7 @@ public class CourseChapterController {
     }
 
     // 根据课程id查询章节信息
+    @Operation(summary = "根据课程id查询章节信息")
     @GetMapping("/common/course/chapter/{courseId}")
     public Result getChaptersByCourse(@PathVariable Integer courseId) {
         log.info("根据课程id查询章节信息，courseId：{}", courseId);

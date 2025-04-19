@@ -185,5 +185,22 @@ public class CourseServiceImpl implements CourseService {
         int result = courseMapper.removeCourseTeacher(courseId, teacherId);
         return result > 0 ? Result.success("解绑成功") : Result.error("解绑失败");
     }
+    
+    @Override
+    public Result getCoursesByStudentId(Long studentId) {
+        try {
+            // 根据学生ID获取班级ID
+            Integer classId = courseMapper.getClassIdByStudentId(studentId);
+            if (classId == null) {
+                return Result.error("该学生未分配班级");
+            }
+            
+            // 根据班级ID获取课程列表
+            List<Course> courses = courseMapper.getCoursesByClassId(classId);
+            return Result.success(courses);
+        } catch (Exception e) {
+            return Result.error("获取学生课程失败: " + e.getMessage());
+        }
+    }
 
 }

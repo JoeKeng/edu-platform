@@ -1,0 +1,93 @@
+server:
+  port: 9092
+
+spring:
+  # AI相关配置
+  ai:
+    # OpenAI服务配置，包含API密钥、基础URL以及聊天模型选项
+    openai:
+      base-url: "https://api.siliconflow.cn"
+      api-key: "sk-ihlmvoruwafcgzljixnrysmbctnqgtgnxerevdvyceqbtgec"
+#      # 聊天模型配置参数
+#      chat:
+#        options:
+      model: "Pro/deepseek-ai/DeepSeek-V3"
+    # 向量存储服务配置，使用Chroma作为向量数据库客户端
+    vectorstore:
+      chroma:
+        client:
+  application:
+    name: my-edu-platform
+
+  #数据库连接信息
+  datasource:
+    #    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/edu_platform
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: yqr123456
+# Neo4j数据库配置
+  neo4j:
+    enabled: false  # 暂时禁用 Neo4j
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: yqr123456
+  # 指定数据库
+  data:
+    neo4j:
+      database: test1
+
+    # 文件上传配置
+  servlet:
+    multipart:
+      #最大单个文件大小
+      max-file-size: 50MB
+      #最大总上传限制
+      max-request-size: 100MB
+
+#mybatis配置
+mybatis:
+  configuration:
+      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 启用 SQL 日志
+      mybatis.locations: classpath:mapper/*.xml
+      # 数据库字段转 Java 驼峰
+      map-underscore-to-camel-case: true
+
+
+  #配置事务管理日志级别
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
+
+#阿里OSS
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    bucketName: edu--platform
+    region: cn-beijing
+
+# springdoc-openapi项目配置
+springdoc:
+  swagger-ui:
+    #自定义swagger前端请求路径,输入http:localhost:8080/swagger-ui会自动重定向到swagger页面
+    path: /swagger-ui
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs  #swagger后端请求地址
+    enabled: true   #是否开启文档功能
+  group-configs: #分组配置,可配置多个分组
+    - group: 'default'             #分组名称
+      paths-to-match: '/**'        #配置需要匹配的路径
+      packages-to-scan: com.edusystem.controller    #配置要扫描包的路径,一般配置到启动类所在的包名
+
+knife4j:
+  enable: false
+  # 访问接口文档时候的认证信息
+  basic:
+    enable: true
+    username: admin
+    password: admin
+  # 访问接口的时候,获取token的地址
+  tokenUrl: http://ip:port/getToken

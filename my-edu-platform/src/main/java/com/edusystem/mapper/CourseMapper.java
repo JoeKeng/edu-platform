@@ -3,6 +3,8 @@ package com.edusystem.mapper;
 import com.edusystem.model.Course;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.Arrays;
 import java.util.List;
 
 @Mapper
@@ -40,5 +42,21 @@ public interface CourseMapper {
     void deleteCourseTeachers(Integer courseId);
 
     void deleteCourseClasses(Integer courseId);
+    
+    /**
+     * 根据学生ID获取班级ID
+     * @param studentId 学生ID
+     * @return 班级ID
+     */
+    Integer getClassIdByStudentId(@Param("studentId") Long studentId);
+    
+    /**
+     * 根据班级ID获取课程列表
+     * @param classId 班级ID
+     * @return 课程列表
+     */
+    List<Course> getCoursesByClassId(@Param("classId") Integer classId);
+
+    List<Course> batchGetCourses(@Param("course") List<Long> course);
 }
 

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edusystem.mapper.StudentAnswerMapper">
+
+    <!-- 插入学生作答记录 -->
+    <insert id="insert" parameterType="com.edusystem.model.StudentAnswer" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_answer (student_id, question_id, assignment_id, answer, score, ai_feedback, teacher_feedback, is_correct, submitted_at)
+        VALUES (#{studentId}, #{questionId}, #{assignmentId}, #{answer}, #{score}, #{aiFeedback}, #{teacherFeedback}, #{isCorrect}, NOW());
+    </insert>
+
+    <!-- 根据作答ID查询 -->
+    <select id="selectById" parameterType="long" resultType="com.edusystem.model.StudentAnswer">
+        SELECT * FROM student_answer WHERE id = #{id};
+    </select>
+
+    <!-- 查询某个作业的所有作答 -->
+    <select id="selectByAssignmentId" parameterType="long" resultType="com.edusystem.model.StudentAnswer">
+        SELECT * FROM student_answer WHERE assignment_id = #{assignmentId};
+    </select>
+
+    <!-- 查询某个学生的所有作答 -->
+    <select id="selectByStudentId" parameterType="long" resultType="com.edusystem.model.StudentAnswer">
+        SELECT * FROM student_answer WHERE student_id = #{studentId};
+    </select>
+    <select id="getLatestAnswer" resultType="com.edusystem.model.StudentAnswer">
+        SELECT * FROM student_answer WHERE student_id = #{studentId} AND question_id = #{questionId} ORDER BY submitted_at DESC LIMIT 1;
+    </select>
+    <select id="selectByCourseAndStudent" resultType="com.edusystem.model.StudentAnswer">
+        SELECT
+            sa.*,
+            a.id AS assignment_id,
+            a.title AS assignment_title
+        FROM
+            student_answer sa
+                JOIN
+            assignment a ON sa.assignment_id = a.id
+        WHERE
+            sa.student_id = #{studentId}  -- 替换为具体的学生ID
+          AND a.course_id = #{courseId}  -- 替换为具体的课程ID
+        ORDER BY
+            sa.submitted_at DESC;
+    </select>
+
+
+    <!-- 更新评分和反馈 -->
+    <update id="updateScoreAndFeedback">
+        UPDATE student_answer
+        SET  is_correct = #{isCorrect} , ai_score = #{aiScore},teacher_score = #{teacherScore} , ai_feedback = #{aiFeedback}, teacher_feedback = #{teacherFeedback} , explanation = #{explanation}
+        WHERE id = #{id};
+    </update>
+
+    <update id="batchUpdateTeacherGrade">
+        UPDATE student_answer
+        <set>
+            teacher_score = CASE id
+            <foreach collection="grades" item="item">
+                WHEN #{item.studentAnswerId} THEN #{item.teacherScore}
+            </foreach>
+            END,
+
+            teacher_feedback = CASE id
+            <foreach collection="grades" item="item">
+                WHEN #{item.studentAnswerId} THEN #{item.teacherFeedback}
+            </foreach>
+            END
+        </set>
+        WHERE id IN
+        <foreach collection="grades" item="item" open="(" separator="," close=")">
+            #{item.studentAnswerId}
+        </foreach>
+    </update>
+
+
+
+    <!-- 统计学生的作业总数 -->
+    <select id="countAssignmentsByStudentId" resultType="int">
+        SELECT COUNT(DISTINCT assignment_id)
+        FROM student_answer
+        WHERE student_id = #{studentId}
+    </select>
+
+    <!-- 统计学生已完成的作业数 -->
+    <select id="countCompletedAssignmentsByStudentId" resultType="int">
+        SELECT COUNT(DISTINCT assignment_id)
+        FROM student_answer
+        WHERE student_id = #{studentId}
+
+    </select>
+    <!-- 获取学生的考试成绩 -->
+    <select id="getExamScoresByStudentId" resultType="java.util.Map">
+        SELECT 
+            ea.exam_id,
+            e.title as exam_title,
+            SUM(ea.score) as total_score,
+            COUNT(DISTINCT eq.id) as total_questions,
+            COUNT(CASE WHEN ea.status = 'SUBMITTED' THEN 1 END) as completed_questions,
+            DATE_FORMAT(MAX(ea.submit_time), '%Y-%m-%d %H:%i:%s') as submission_time
+        FROM 
+            exam_answer ea
+            JOIN exam_question eq ON ea.question_id = eq.question_id AND ea.exam_id = eq.exam_id
+            JOIN exam e ON ea.exam_id = e.id
+        WHERE 
+            ea.student_id = #{studentId}
+        GROUP BY 
+            ea.exam_id, e.title
+        ORDER BY 
+            submission_time DESC
+    </select>
+    <!-- 获取知识点相关题目的正确率 -->
+    <select id="getKnowledgePointAccuracy" resultType="double">
+        SELECT 
+            COALESCE(AVG(CASE WHEN sa.is_correct = 1 THEN 1.0 ELSE 0.0 END), 0.0) as accuracy
+        FROM 
+            student_answer sa
+            JOIN question_bank q ON sa.question_id = q.id
+            JOIN question_knowledge_point qkp ON q.id = qkp.question_id
+        WHERE 
+            sa.student_id = #{studentId}
+            AND qkp.knowledge_point_id = #{knowledgePointId}
+    </select>
+</mapper>

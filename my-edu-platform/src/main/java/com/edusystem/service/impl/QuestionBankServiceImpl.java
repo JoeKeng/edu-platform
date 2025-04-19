@@ -20,7 +20,7 @@ public class QuestionBankServiceImpl implements QuestionBankService {
     @Override
     public int addQuestion(QuestionBank question) {
         // 如果 options 字段为空，设置为默认值（空 JSON 数组）
-        if (question.getOptions() == null) {
+        if (question.getOptions() == null|| question.getOptions().equals("")|| question.getOptions().isEmpty()) {
             question.setOptions("[]");
         } else {
             // 如果 options 是逗号分隔的字符串，转换为 JSON 数组

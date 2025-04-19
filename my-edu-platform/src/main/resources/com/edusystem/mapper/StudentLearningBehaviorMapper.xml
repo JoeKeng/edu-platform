@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.StudentLearningBehaviorMapper">
+    
+    <resultMap id="BaseResultMap" type="com.edusystem.model.StudentLearningBehavior">
+        <id column="id" property="id" />
+        <result column="student_id" property="studentId" />
+        <result column="behavior_type" property="behaviorType" />
+        <result column="resource_type" property="resourceType" />
+        <result column="resource_id" property="resourceId" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="duration" property="duration" />
+        <result column="device_info" property="deviceInfo" />
+        <result column="ip_address" property="ipAddress" />
+        <result column="created_at" property="createdAt" />
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        id, student_id, behavior_type, resource_type, resource_id, start_time, end_time,
+        duration, device_info, ip_address, created_at, is_deleted
+    </sql>
+    
+    <insert id="insert" parameterType="com.edusystem.model.StudentLearningBehavior" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_learning_behavior (
+            student_id, behavior_type, resource_type, resource_id, start_time, end_time,
+            duration, device_info, ip_address, created_at, is_deleted
+        ) VALUES (
+            #{studentId}, #{behaviorType}, #{resourceType}, #{resourceId}, #{startTime}, #{endTime},
+            #{duration}, #{deviceInfo}, #{ipAddress}, #{createdAt}, #{isDeleted}
+        )
+    </insert>
+    
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM student_learning_behavior
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+    
+    <select id="selectByStudentIdAndType" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM student_learning_behavior
+        WHERE student_id = #{studentId}
+        <if test="behaviorType != null">
+            AND behavior_type = #{behaviorType}
+        </if>
+        <if test="startTime != null">
+            AND start_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND end_time &lt;= #{endTime}
+        </if>
+        AND is_deleted = 0
+                ORDER BY start_time DESC
+    </select>
+    
+    <select id="countByStudentIdAndType" resultType="int">
+        SELECT COUNT(*)
+        FROM student_learning_behavior
+        WHERE student_id = #{studentId}
+        <if test="behaviorType != null">
+            AND behavior_type = #{behaviorType}
+        </if>
+        <if test="startTime != null">
+            AND start_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND end_time &lt;= #{endTime}
+        </if>
+        AND is_deleted = 0
+    </select>
+    
+    <select id="sumDurationByStudentIdAndType" resultType="int">
+        SELECT IFNULL(SUM(duration), 0)
+        FROM student_learning_behavior
+        WHERE student_id = #{studentId}
+        <if test="behaviorType != null">
+            AND behavior_type = #{behaviorType}
+        </if>
+        <if test="startTime != null">
+            AND start_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND end_time &lt;= #{endTime}
+        </if>
+        AND is_deleted = 0
+    </select>
+    
+    <select id="selectByClassId" resultMap="BaseResultMap">
+        SELECT b.*
+        FROM student_learning_behavior b
+        JOIN student s ON b.student_id = s.student_id
+        WHERE s.class_id = #{classId}
+        <if test="behaviorType != null">
+            AND b.behavior_type = #{behaviorType}
+        </if>
+        <if test="startTime != null">
+            AND b.start_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND b.end_time &lt;= #{endTime}
+        </if>
+        AND b.is_deleted = 0
+        ORDER BY b.start_time DESC
+    </select>
+</mapper>

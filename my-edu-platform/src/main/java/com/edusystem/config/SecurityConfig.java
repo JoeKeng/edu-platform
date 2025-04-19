@@ -23,11 +23,22 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/user/register", "/user/login","/ai/**").permitAll()// 允许匿名访问
+                                .requestMatchers(
+                                        "/user/register",
+                                        "/user/login",
+                                        "/doc.html",
+                                        "/doc.html/**",
+                                        "/webjars/**",
+                                        "/v3/api-docs/**",
+                                        "/swagger-resources",
+                                        "/swagger-resources/**",
+                                        "/swagger-ui/**"
+                                ).permitAll()
+                            // 允许匿名访问
 //                        .requestMatchers("/common/**").permitAll()// 允许匿名访问
-                        .requestMatchers("/student/**").hasRole("STUDENT")  // 仅学生访问
-                        .requestMatchers("/teacher/**", "/students/**").hasRole("TEACHER")  // 仅教师访问
-                        .requestMatchers("/common/**","/upload/**","/question/**","/assignment/**").hasAnyRole("STUDENT", "TEACHER")  // 共享访问
+                        .requestMatchers("/student/**","/wrong-question","/student-analysis","/student-data").hasRole("STUDENT")  // 仅学生访问
+                        .requestMatchers("/teacher/**", "/students/**","upload/**").hasRole("TEACHER")  // 仅教师访问
+                        .requestMatchers("/common/**","/upload/**","/question/**","/assignment/**","/exam/**").hasAnyRole("STUDENT", "TEACHER")  // 共享访问
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())  // 关闭 CSRF 保护（需要时可以开启）

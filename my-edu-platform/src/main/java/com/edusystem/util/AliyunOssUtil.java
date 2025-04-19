@@ -6,6 +6,9 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.common.auth.CredentialsProviderFactory;
 import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
 import com.aliyun.oss.common.comm.SignVersion;
+import com.aliyun.oss.model.DeleteObjectsRequest;
+import com.aliyun.oss.model.DeleteObjectsResult;
+import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import com.aliyuncs.exceptions.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -119,4 +125,73 @@ public class AliyunOssUtil {
             return null;
         }
     }
+
+    /**
+     * 生成文件下载 URL（带签名，临时有效）
+     * @param filePath OSS 上的文件路径（例如 "resources/2024/03/uuid.pdf"）
+     * @param expireMinutes 过期时间（单位：分钟）
+     * @return 临时下载 URL
+     */
+    public String generateDownloadUrl(String filePath, int expireMinutes) {
+        try {
+            OSS ossClient = createOssClient();
+
+            // 设置 URL 过期时间（默认 10 分钟）
+            Date expiration = new Date(System.currentTimeMillis() + expireMinutes * 60 * 1000);
+
+            // 生成预签名 URL 请求
+            GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, filePath);
+            request.setExpiration(expiration);
+
+            URL url = ossClient.generatePresignedUrl(request);
+            ossClient.shutdown();
+
+            return url != null ? url.toString() : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 删除 OSS 文件
+     */
+    public boolean deleteFile(String filePath) {
+        try {
+            OSS ossClient = createOssClient();
+            ossClient.deleteObject(bucketName, filePath);
+            ossClient.shutdown();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * 批量删除 OSS 文件
+     */
+    public boolean deleteFiles(List<String> filePaths) {
+        if (filePaths == null || filePaths.isEmpty()) {
+            return false;
+        }
+
+        try {
+            OSS ossClient = createOssClient();
+            DeleteObjectsRequest request = new DeleteObjectsRequest(bucketName).withKeys(filePaths);
+            DeleteObjectsResult result = ossClient.deleteObjects(request);
+            ossClient.shutdown();
+
+            // 确保所有文件都被成功删除
+            return result.getDeletedObjects().size() == filePaths.size();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
+
 }

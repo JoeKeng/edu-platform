@@ -3,9 +3,14 @@ package com.edusystem.controller;
 import com.edusystem.model.LoginInfo;
 import com.edusystem.model.Result;
 import com.edusystem.model.User;
+import com.edusystem.service.UserLoginLogService;
 import com.edusystem.service.UserService;
-import dao.LoginDTO;
-import dao.UserRegisterDTO;
+import com.edusystem.dto.LoginDTO;
+import com.edusystem.dto.UserRegisterDTO;
+import com.edusystem.util.RequestUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,12 +19,16 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
+@Tag(name = "用户认证")
 public class AuthController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserLoginLogService userLoginLogService;
 
 
+    @Operation(summary = "用户注册")
     @PostMapping("/user/register")
     public Result register(@RequestBody UserRegisterDTO userDTO) {
         log.info("接收到注册请求, 用户名: {}", userDTO.getUsername());
@@ -43,8 +52,9 @@ public class AuthController {
     /**
      * 登录
      */
+    @Operation(summary = "用户登录")
     @PostMapping("/user/login")
-    public Result login(@RequestBody LoginDTO loginDTO) {
+    public Result login(@RequestBody LoginDTO loginDTO, HttpServletRequest request) {
         if (loginDTO.getIdentifier() == null || loginDTO.getIdentifier().isEmpty()) {
             return Result.error("identifier 参数不能为空");
         }
@@ -58,7 +68,15 @@ public class AuthController {
         if (loginInfo != null) {
             String token = loginInfo.getToken();
             // 使用 token
-             if (token != null) {
+            if (token != null) {
+            // 获取用户 ID
+            Long userId = Long.valueOf(loginInfo.getId());
+            // 获取 IP 和设备信息
+            String ipAddress = RequestUtil.getClientIP(request);
+            String deviceInfo = RequestUtil.getDeviceInfo(request);
+
+            // 记录用户登录日志
+            userLoginLogService.recordLogin(userId, ipAddress, deviceInfo);
                         return Result.success(loginInfo);
                     } else {
                         return Result.error("登录失败，用户名、邮箱或手机号不正确，或密码错误");
@@ -74,6 +92,7 @@ public class AuthController {
     /**
      * 获取当前登录用户信息
      */
+    @Operation(summary = "获取当前登录用户信息")
     @GetMapping("/common/user/{userId}")
     public Result getUserInfo(@PathVariable Integer userId) {
         User user = userService.getUserInfoByUserId(userId);
@@ -84,11 +103,14 @@ public class AuthController {
     /**
      * 更新用户信息
      */
+    @Operation(summary = "更新用户信息")
     @PutMapping("/common/user/update")
     public Result updateUser(@RequestBody User user) {
         log.info("更新用户信息，参数：{}", user);
         userService.updateUserById(user);
         return Result.success();
     }
+
+
 
 }

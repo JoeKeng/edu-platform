@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.QuestionBankMapper">
+    <!-- 批量获取题目 -->
+    <select id="batchGetByIds" resultType="com.edusystem.model.QuestionBank">
+        SELECT * FROM question_bank WHERE id IN (
+            <foreach collection="question" item="item" separator=",">
+                #{item}
+            </foreach>
+        )
+    </select>
+    
+    <!-- 获取题目关联的知识点 -->
+    <select id="getKnowledgePointsByQuestionId" resultType="java.util.Map">
+        SELECT 
+            kp.id, 
+            kp.name, 
+            kp.course_id, 
+            kp.chapter_id, 
+            kp.parent_id, 
+            kp.description, 
+            qkp.weight
+        FROM 
+            knowledge_point kp
+        JOIN 
+            question_knowledge_point qkp ON kp.id = qkp.knowledge_point_id
+        WHERE 
+            qkp.question_id = #{questionId}
+        ORDER BY 
+            qkp.weight DESC
+    </select>
+    
+    <!-- 获取课程关联的知识点 -->
+    <select id="getKnowledgePointsByCourseId" resultType="java.util.Map">
+        SELECT 
+            kp.id, 
+            kp.name, 
+            kp.course_id, 
+            kp.chapter_id, 
+            kp.parent_id, 
+            kp.description,
+            COUNT(qkp.question_id) as question_count
+        FROM 
+            knowledge_point kp
+        LEFT JOIN 
+            question_knowledge_point qkp ON kp.id = qkp.knowledge_point_id
+        WHERE 
+            kp.course_id = #{courseId}
+        GROUP BY 
+            kp.id
+        ORDER BY 
+            kp.id
+    </select>
+    
+    <!-- 添加题目知识点关联 -->
+    <insert id="addQuestionKnowledgePoint">
+        INSERT INTO question_knowledge_point (
+            question_id, 
+            knowledge_point_id, 
+            weight, 
+            created_at
+        ) VALUES (
+            #{questionId}, 
+            #{knowledgePointId}, 
+            #{weight}, 
+            NOW()
+        )
+    </insert>
+    
+    <!-- 删除题目知识点关联 -->
+    <delete id="deleteQuestionKnowledgePoint">
+        DELETE FROM 
+            question_knowledge_point 
+        WHERE 
+            question_id = #{questionId} 
+            AND knowledge_point_id = #{knowledgePointId}
+    </delete>
+    
+    <!-- 更新题目知识点关联权重 -->
+    <update id="updateQuestionKnowledgePointWeight">
+        UPDATE 
+            question_knowledge_point 
+        SET 
+            weight = #{weight} 
+        WHERE 
+            question_id = #{questionId} 
+            AND knowledge_point_id = #{knowledgePointId}
+    </update>
+</mapper>

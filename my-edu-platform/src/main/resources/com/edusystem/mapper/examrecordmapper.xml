@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edusystem.mapper.ExamRecordMapper">
+    
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.edusystem.model.ExamRecord">
+        <id column="id" property="id" />
+        <result column="exam_id" property="examId" />
+        <result column="student_id" property="studentId" />
+        <result column="start_time" property="startTime" />
+        <result column="submit_time" property="submitTime" />
+        <result column="total_score" property="totalScore" />
+        <result column="status" property="status" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+    
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, exam_id, student_id, start_time, submit_time, total_score, status, created_at, updated_at
+    </sql>
+    
+    <!-- 插入考试记录 -->
+    <insert id="insert" parameterType="com.edusystem.model.ExamRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO exam_record (
+            exam_id, student_id, start_time, submit_time, total_score, status, created_at, updated_at
+        ) VALUES (
+            #{examId}, #{studentId}, #{startTime}, #{submitTime}, #{totalScore}, #{status}, 
+            #{createdAt}, #{updatedAt}
+        )
+        ON DUPLICATE KEY UPDATE
+            start_time = VALUES(start_time),
+            submit_time = VALUES(submit_time),
+            total_score = VALUES(total_score),
+            status = VALUES(status),
+            updated_at = VALUES(updated_at)
+    </insert>
+    
+    <!-- 更新考试记录 -->
+    <update id="update" parameterType="com.edusystem.model.ExamRecord">
+        UPDATE exam_record
+        <set>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="totalScore != null">total_score = #{totalScore},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_at = NOW()
+        </set>
+        WHERE exam_id = #{examId} AND student_id = #{studentId}
+    </update>
+    
+    <!-- 根据考试ID和学生ID查询考试记录 -->
+    <select id="getByExamAndStudent" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM exam_record
+        WHERE exam_id = #{examId} AND student_id = #{studentId}
+    </select>
+    
+    <!-- 根据考试ID和学生ID更新考试记录状态 -->
+    <update id="updateStatus">
+        UPDATE exam_record
+        SET status = #{status},
+            submit_time = #{submitTime},
+            updated_at = NOW()
+        WHERE exam_id = #{examId} AND student_id = #{studentId}
+    </update>
+    
+    <!-- 根据考试ID查询所有考试记录 -->
+    <select id="getByExamId" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM exam_record
+        WHERE exam_id = #{examId}
+        ORDER BY submit_time DESC
+    </select>
+    
+    <!-- 根据学生ID查询所有考试记录 -->
+    <select id="getByStudentId" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List" />
+        FROM exam_record
+        WHERE student_id = #{studentId}
+        ORDER BY submit_time DESC
+    </select>
+    
+    <!-- 更新考试总分 -->
+    <update id="updateTotalScore">
+        UPDATE exam_record
+        SET total_score = #{totalScore},
+            status = 'GRADED',
+            updated_at = NOW()
+        WHERE exam_id = #{examId} AND student_id = #{studentId}
+    </update>
+</mapper>

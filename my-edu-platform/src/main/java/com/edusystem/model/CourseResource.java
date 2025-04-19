@@ -1,6 +1,7 @@
 package com.edusystem.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -8,7 +9,9 @@ import java.util.Date;
  * 课程资源实体类
  */
 @Data
+@NoArgsConstructor
 public class CourseResource {
+
     private Integer resourceId;  // 资源ID
     private Integer courseId;    // 课程ID
     private Integer chapterId;   // 章节ID
