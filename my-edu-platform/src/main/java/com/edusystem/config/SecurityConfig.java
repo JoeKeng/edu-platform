@@ -15,6 +15,8 @@ import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+import org.springframework.http.HttpMethod;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -34,6 +36,8 @@ public class SecurityConfig {
                                         "/swagger-resources/**",
                                         "/swagger-ui/**"
                                 ).permitAll()
+                                // 允许所有OPTIONS请求（预检请求）确保前端可以正常访问API：
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             // 允许匿名访问
 //                        .requestMatchers("/common/**").permitAll()// 允许匿名访问
                         .requestMatchers("/student/**","/wrong-question","/student-analysis","/student-data").hasRole("STUDENT")  // 仅学生访问
