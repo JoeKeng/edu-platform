@@ -4,6 +4,7 @@ import com.edusystem.mapper.KnowledgePointMapper;
 import com.edusystem.mapper.QuestionBankMapper;
 import com.edusystem.mapper.StudentKnowledgeMasteryMapper;
 import com.edusystem.model.KnowledgePoint;
+import com.edusystem.model.Result;
 import com.edusystem.model.StudentKnowledgeMastery;
 import com.edusystem.service.KnowledgePointService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +98,30 @@ public class KnowledgePointServiceImpl implements KnowledgePointService {
     @Transactional
     public boolean addQuestionKnowledgePoint(Long questionId, Long knowledgePointId, Double weight) {
         return questionBankMapper.addQuestionKnowledgePoint(questionId, knowledgePointId, weight) > 0;
+    }
+
+    // 批量添加题目知识点关联
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result batchAddQuestionKnowledgePoint(Long questionId, List<Long> knowledgePointIds, List<Double> weights) {
+        if (questionId == null || knowledgePointIds == null || weights == null || knowledgePointIds.size() != weights.size()) {
+            return Result.error("参数错误");
+        }
+
+        // 不使用try-catch，让异常直接向上传播，触发事务回滚
+        for (int i = 0; i < knowledgePointIds.size(); i++) {
+            Long knowledgePointId = knowledgePointIds.get(i);
+            Double weight = weights.get(i);
+
+            if (weight < 0 || weight > 10) {
+                throw new IllegalArgumentException("权重必须在0到10之间");
+            }
+            int result = questionBankMapper.addQuestionKnowledgePoint(questionId, knowledgePointId, weight);
+            if (result <= 0) {
+                throw new RuntimeException("添加知识点" + knowledgePointId + "失败");
+            }
+        }
+        return Result.success();
     }
 
     @Override

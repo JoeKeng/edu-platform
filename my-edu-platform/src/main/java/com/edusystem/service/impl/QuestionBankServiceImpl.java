@@ -2,6 +2,7 @@ package com.edusystem.service.impl;
 
 import com.edusystem.mapper.QuestionBankMapper;
 import com.edusystem.model.QuestionBank;
+import com.edusystem.service.KnowledgePointService;
 import com.edusystem.service.QuestionBankService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,6 +18,8 @@ public class QuestionBankServiceImpl implements QuestionBankService {
 
     @Autowired
     private QuestionBankMapper questionBankMapper;
+    @Autowired
+    private KnowledgePointService  knowledgePointService;
 
     @Override
     public int addQuestion(QuestionBank question) {
@@ -53,8 +57,19 @@ public class QuestionBankServiceImpl implements QuestionBankService {
         // 插入问题
         int result = questionBankMapper.insert(question);
         //TODO将知识点和题目关联
-        if(result > 0){
+        // 如果插入成功且有关联的知识点，则添加知识点关联
+        if (result > 0 && question.getKnowledgePointIds() != null && !question.getKnowledgePointIds().isEmpty()) {
+            List<Double> weights = question.getKnowledgePointWeights();
+            // 如果没有提供权重或权重数量不匹配，则使用默认权重1.0
+            if (weights == null || weights.size() != question.getKnowledgePointIds().size()) {
+                weights = new ArrayList<>();
+                for (int i = 0; i < question.getKnowledgePointIds().size(); i++) {
+                    weights.add(1.0); // 默认权重为1.0
+                }
+            }
 
+            // 批量添加题目知识点关联
+            knowledgePointService.batchAddQuestionKnowledgePoint(question.getId(), question.getKnowledgePointIds(), weights);
         }
 
         return result;

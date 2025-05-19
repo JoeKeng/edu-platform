@@ -1,5 +1,6 @@
   package com.edusystem.controller;
 
+import com.edusystem.dto.QuestionKnowledgePointDTO;
 import com.edusystem.model.KnowledgePoint;
 import com.edusystem.model.Result;
 import com.edusystem.service.KnowledgePointService;
@@ -100,18 +101,30 @@ public class KnowledgePointController {
         return Result.success(knowledgePointTree);
     }
 
+//    /**
+//     * 添加题目知识点关联
+//     */
+//    @Operation(summary = "添加题目知识点关联")
+//    @PostMapping("/teacher/knowledge/question/add")
+//    public Result addQuestionKnowledgePoint(
+//            @RequestParam Long questionId,
+//            @RequestParam Long knowledgePointId,
+//            @RequestParam(required = false, defaultValue = "1.0") Double weight) {
+//        log.info("添加题目知识点关联，questionId：{}，knowledgePointId：{}，weight：{}", questionId, knowledgePointId, weight);
+//        boolean success = knowledgePointService.addQuestionKnowledgePoint(questionId, knowledgePointId, weight);
+//        return success ? Result.success() : Result.error("添加题目知识点关联失败");
+//    }
+
     /**
-     * 添加题目知识点关联
+     * 批量添加题目知识点关联
      */
-    @Operation(summary = "添加题目知识点关联")
-    @PostMapping("/teacher/knowledge/question/add")
-    public Result addQuestionKnowledgePoint(
-            @RequestParam Long questionId,
-            @RequestParam Long knowledgePointId,
-            @RequestParam(required = false, defaultValue = "1.0") Double weight) {
-        log.info("添加题目知识点关联，questionId：{}，knowledgePointId：{}，weight：{}", questionId, knowledgePointId, weight);
-        boolean success = knowledgePointService.addQuestionKnowledgePoint(questionId, knowledgePointId, weight);
-        return success ? Result.success() : Result.error("添加题目知识点关联失败");
+    @Operation(summary = "批量添加题目知识点关联")
+    @PostMapping("/teacher/knowledge/question/add/batch")
+    public Result addQuestionKnowledgePoints(@RequestBody QuestionKnowledgePointDTO request) {
+        log.info("批量添加题目知识点关联，questionId：{}，knowledgePointIds：{}，weights：{}",
+                request.getQuestionId(), request.getKnowledgePointIds(), request.getWeights());
+        return knowledgePointService.batchAddQuestionKnowledgePoint(
+                request.getQuestionId(), request.getKnowledgePointIds(), request.getWeights());
     }
 
     /**

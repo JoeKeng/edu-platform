@@ -1,6 +1,7 @@
  package com.edusystem.service;
 
 import com.edusystem.model.KnowledgePoint;
+import com.edusystem.model.Result;
 
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,16 @@ public interface KnowledgePointService {
      * @return 添加结果
      */
     boolean addQuestionKnowledgePoint(Long questionId, Long knowledgePointId, Double weight);
-    
+
+    /**
+     * 批量添加题目知识点关联
+     * @param questionId
+     * @param knowledgePointIds
+     * @param weights
+     * @return
+     */
+    Result batchAddQuestionKnowledgePoint(Long questionId, List<Long> knowledgePointIds, List<Double> weights);
+
     /**
      * 删除题目知识点关联
      * @param questionId 题目ID
@@ -115,4 +125,6 @@ public interface KnowledgePointService {
      * @return 班级知识点掌握情况统计
      */
     Map<String, Object> getClassKnowledgePointStats(Integer classId, Long knowledgePointId);
+
+
 }
