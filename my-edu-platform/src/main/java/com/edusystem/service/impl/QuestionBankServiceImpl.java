@@ -56,7 +56,6 @@ public class QuestionBankServiceImpl implements QuestionBankService {
         }
         // 插入问题
         int result = questionBankMapper.insert(question);
-        //TODO将知识点和题目关联
         // 如果插入成功且有关联的知识点，则添加知识点关联
         if (result > 0 && question.getKnowledgePointIds() != null && !question.getKnowledgePointIds().isEmpty()) {
             List<Double> weights = question.getKnowledgePointWeights();
