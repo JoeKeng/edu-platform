@@ -5,6 +5,7 @@ import com.edusystem.mapper.*;
 import com.edusystem.model.*;
 import com.edusystem.model.Class;
 import com.edusystem.service.AIService;
+import com.edusystem.service.KnowledgePointService;
 import com.edusystem.service.StudentDataAnalysisService;
 import com.edusystem.service.WrongQuestionService;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,9 @@ public class StudentDataAnalysisServiceImpl implements StudentDataAnalysisServic
 
     @Autowired
     private AIGradingFactory aiGradingFactory;
+    
+    @Autowired
+    private KnowledgePointService knowledgePointService;
 
 
     @Override
@@ -284,7 +288,17 @@ public class StudentDataAnalysisServiceImpl implements StudentDataAnalysisServic
             String questionType = question.getType();
 
             // 获取知识点
-            List<KnowledgePoint> knowledgePoints = question.getKnowledgePoints();
+            List<Long> knowledgePointIds = question.getKnowledgePointIds();
+            //TODO:  根据知识点ID从数据库中获取知识点信息
+            List<KnowledgePoint> knowledgePoints = new ArrayList<>();
+            if (knowledgePointIds != null && !knowledgePointIds.isEmpty()) {
+                for (Long kpId : knowledgePointIds) {
+                    KnowledgePoint kp = knowledgePointService.getKnowledgePointById(kpId);
+                    if (kp != null) {
+                        knowledgePoints.add(kp);
+                    }
+                }
+            }
 
             // 更新题型统计
             updateTypeStats(questionTypeStats, questionType, answer.getIsCorrect());

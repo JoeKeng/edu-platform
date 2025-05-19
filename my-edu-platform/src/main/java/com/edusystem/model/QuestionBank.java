@@ -27,5 +27,8 @@ public class QuestionBank {
     private Date updatedAt;//题目最后更新时间
     // 添加知识点关联属性
     @TableField(exist = false)  // 标记该字段不是数据库表中的字段
-    private List<KnowledgePoint> knowledgePoints;
+    private List<Long> knowledgePointIds;
+     // 非数据库字段，用于关联知识点权重
+     @TableField(exist = false)
+     private List<Double> knowledgePointWeights;  // 关联的知识点权重列表
 }

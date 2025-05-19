@@ -111,27 +111,44 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginInfo login(String identifier, String password) {
-
         User user = userMapper.findByUsername(identifier);
         if(user!=null){
             log.info("用户 user:{}" , user);
+        } else {
+            log.info("通过用户名 {} 未找到用户", identifier);
         }
         if (user == null) {
             user = userMapper.findByEmail(identifier);
+            if(user != null) {
+                log.info("通过邮箱找到用户: {}", user);
+            }
         }
         if (user == null) {
             user = userMapper.findByPhone(identifier);
+            if(user != null) {
+                log.info("通过手机号找到用户: {}", user);
+            }
         }
-        if (user != null && passwordEncoder.matches(password, user.getPasswordHash())) {
-            // 生成JWT令牌
-            Map<String, Object> claims = new HashMap<>();
-            claims.put("id", user.getUserId());
-            claims.put("username", user.getUsername());
-            claims.put("role", user.getRole());
-            String jwt = JwtUtil.generateToken(claims);
-            return new LoginInfo(user.getUserId(), user.getUsername(), user.getRole(), jwt);
+        
+        if (user == null) {
+            log.warn("登录失败: 用户 {} 不存在", identifier);
+            return null;
         }
-        return null;
+        
+        boolean passwordMatches = passwordEncoder.matches(password, user.getPasswordHash());
+        if (!passwordMatches) {
+            log.warn("登录失败: 用户 {} 密码不匹配", identifier);
+            return null;
+        }
+        
+        // 生成JWT令牌
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", user.getUserId());
+        claims.put("username", user.getUsername());
+        claims.put("role", user.getRole());
+        String jwt = JwtUtil.generateToken(claims);
+        log.info("用户 {} 登录成功", user.getUsername());
+        return new LoginInfo(user.getUserId(), user.getUsername(), user.getRole(), jwt);
     }
 
     @Override

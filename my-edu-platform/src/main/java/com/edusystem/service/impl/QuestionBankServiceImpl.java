@@ -50,7 +50,14 @@ public class QuestionBankServiceImpl implements QuestionBankService {
                 }
             }
         }
-        return questionBankMapper.insert(question);
+        // 插入问题
+        int result = questionBankMapper.insert(question);
+        //TODO将知识点和题目关联
+        if(result > 0){
+
+        }
+
+        return result;
     }
 
     @Override

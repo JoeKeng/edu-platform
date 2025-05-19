@@ -31,6 +31,9 @@ build/
 # 项目相关
 /springboot-neo4j/
 /tlias-web-management/
+.trae/.ignore
+/.idea/
+
 
 ### VS Code ###
 .vscode/

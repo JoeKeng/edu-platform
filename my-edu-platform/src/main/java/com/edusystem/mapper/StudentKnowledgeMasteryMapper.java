@@ -13,6 +13,7 @@ import java.util.Map;
 @Mapper
 public interface StudentKnowledgeMasteryMapper {
 
+    //TODO知识点掌握的操作
     /**
      * 插入知识点掌握情况
      */
@@ -33,7 +34,7 @@ public interface StudentKnowledgeMasteryMapper {
     /**
      * 根据学生ID查询所有知识点掌握情况
      */
-    List<Map<String, Object>> selectAllMasteryByStudentId(Long studentId);
+    List<Map<String, Object>> selectAllMasteryByStudentId(@Param("studentId") Long studentId);
 
     /**
      * 根据学生ID和课程ID查询知识点掌握情况

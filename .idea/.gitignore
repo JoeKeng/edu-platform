@@ -1,8 +1,15 @@
-# 默认忽略的文件
-/shelf/
-/workspace.xml
-# 基于编辑器的 HTTP 客户端请求
-/httpRequests/
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
+# 这是一个.gitignore文件，用于指定Git版本控制中需要忽略的文件和目录
+
+# IDE工作区相关文件
+/shelf/              # 忽略shelf目录
+/workspace.xml       # 忽略workspace.xml配置文件
+
+# HTTP请求相关
+/httpRequests/       # 忽略IDE中的HTTP请求历史记录
+
+# 数据源配置相关
+/dataSources/        # 忽略数据源配置目录
+/dataSources.local.xml   # 忽略本地数据源配置文件
+
+# 项目相关
+springboot-neo4j/    # 忽略springboot-neo4j目录
