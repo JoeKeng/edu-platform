@@ -1,12 +1,16 @@
 package com.edusystem.service.impl;
 
 import com.edusystem.mapper.QuestionBankMapper;
+import com.edusystem.model.PageResult;
 import com.edusystem.model.QuestionBank;
+import com.edusystem.model.Result;
 import com.edusystem.service.KnowledgePointService;
 import com.edusystem.service.QuestionBankService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -135,5 +139,42 @@ public class QuestionBankServiceImpl implements QuestionBankService {
     @Override
     public int deleteQuestion(Long id) {
         return questionBankMapper.delete(id);
+    }
+
+    // 分页查询题库
+    @Override
+    public PageResult<QuestionBank> pageQuestions(Integer page, Integer pageSize, String type, String difficulty, Integer courseId, Integer chapterId) {
+        PageHelper.startPage(page, pageSize);
+        List<QuestionBank> questions;
+        questions = questionBankMapper.pageQuestions(type, difficulty, courseId, chapterId);
+        Page<QuestionBank> pageInfo = (Page<QuestionBank>) questions;
+
+        return new PageResult< QuestionBank>( pageInfo.getTotal(), pageInfo.getResult());
+
+    }
+
+    @Override
+    // 根据知识点ID查询题目(支持多个知识点)
+    public Result getQuestionByKnowledgePointId(List<Long> knowledgePointIds) {
+        if (knowledgePointIds == null || knowledgePointIds.isEmpty()) {
+            return Result.error("知识点ID列表不能为空");
+        }
+        
+        List<QuestionBank> questions = questionBankMapper.getQuestionsByKnowledgePointIds(knowledgePointIds);
+        
+        if (questions == null || questions.isEmpty()) {
+            return Result.success("没有找到相关题目");
+        }
+        
+        return Result.success(questions);
+    }
+
+    @Override
+    // 分页查询题库根据知识点ID
+    public PageResult<QuestionBank> pageQuestionByKnowledgePointId(Integer page, Integer pageSize, List<Long> knowledgePointIds, String type, String difficulty) {
+        PageHelper.startPage(page, pageSize);
+        List<QuestionBank> questions = questionBankMapper.pageQuestionByKnowledgePointId(knowledgePointIds, type, difficulty);
+        Page<QuestionBank> pageInfo = (Page<QuestionBank>) questions;
+        return new PageResult<QuestionBank>(pageInfo.getTotal(), pageInfo.getResult());
     }
 }

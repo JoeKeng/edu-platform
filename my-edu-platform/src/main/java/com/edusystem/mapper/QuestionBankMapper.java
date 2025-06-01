@@ -36,8 +36,13 @@ public interface QuestionBankMapper {
 
 
     List<QuestionBank> batchGetByIds(List<Long> question);
+    // 分页查询题目
+    List<QuestionBank> pageQuestions(String type, String difficulty, Integer courseId, Integer chapterId);
 
     //TODO:题目知识点模块
+
+    //根据知识点ID获取题目
+
     /**
      * 获取题目关联的知识点
      */
@@ -62,4 +67,14 @@ public interface QuestionBankMapper {
      * 更新题目知识点关联权重
      */
     int updateQuestionKnowledgePointWeight(Long questionId, Long knowledgePointId, Double weight);
+
+    /*
+     * 根据知识点ID获取题目
+     */
+    List<QuestionBank> getQuestionsByKnowledgePointIds(List<Long> knowledgePointIds);
+
+    /*
+    * 根据知识点ID获取题目(分页查询)
+     */
+    List<QuestionBank> pageQuestionByKnowledgePointId(List<Long> knowledgePointIds, String type, String difficulty);
 }

@@ -51,7 +51,52 @@
         ORDER BY 
             kp.id
     </select>
-    
+<!--    分页查询题目-->
+    <select id="pageQuestions" resultType="com.edusystem.model.QuestionBank">
+        SELECT * FROM question_bank qb
+            <where>
+                 <if test="type != null and type != ''">
+                    qb.type = #{type}
+                </if>
+                 <if test="difficulty != null and difficulty != ''">
+                    and qb.difficulty = #{difficulty}
+                 </if>
+                  <if test="courseId != null">
+                    and qb.course_id = #{courseId}
+                </if>
+                   <if test="chapterId != null">
+                    and qb.chapter_id = #{chapterId}
+                   </if>
+            </where> order by qb.updated_at desc
+    </select>
+    <!-- 根据知识点ID获取题目   -->
+    <select id="getQuestionsByKnowledgePointIds" resultType="com.edusystem.model.QuestionBank">
+         SELECT * FROM question_bank qb
+        JOIN question_knowledge_point qkp ON qb.id = qkp.question_id
+        WHERE qkp.knowledge_point_id IN (
+            <foreach item="item" collection="knowledgePointIds" separator=",">
+                #{item}
+            </foreach>
+        )ORDER BY qb.updated_at DESC
+    </select>
+<!--    根据知识点ID分页查询题目  -->
+    <select id="pageQuestionByKnowledgePointId" resultType="com.edusystem.model.QuestionBank">
+        SELECT * FROM question_bank qb
+        JOIN question_knowledge_point qkp ON qb.id = qkp.question_id
+        WHERE qkp.knowledge_point_id IN (
+        <foreach item="knowledgePointId" collection="knowledgePointIds" separator="," open="(" close=")">
+            #{knowledgePointId}
+        </foreach>
+        )
+        <if test="type != null and type != ''">
+            AND qb.type = #{type}
+        </if>
+        <if test="difficulty != null and difficulty != ''">
+            AND qb.difficulty = #{difficulty}
+        </if>
+        ORDER BY qb.updated_at DESC
+    </select>
+
     <!-- 添加题目知识点关联 -->
     <insert id="addQuestionKnowledgePoint">
         INSERT INTO question_knowledge_point (

@@ -158,7 +158,7 @@ public class KnowledgePointController {
      * 获取学生知识点掌握情况
      */
     @Operation(summary = "获取学生知识点掌握情况")
-    @GetMapping("/student/knowledge/mastery")
+    @GetMapping("/knowledge/student/mastery")
     public Result getStudentKnowledgeMastery(
             @RequestParam Long studentId,
             @RequestParam Long knowledgePointId) {
@@ -171,7 +171,7 @@ public class KnowledgePointController {
      * 获取学生课程知识点掌握情况
      */
     @Operation(summary = "获取学生课程知识点掌握情况")
-    @GetMapping("/student/knowledge/mastery/course")
+    @GetMapping("/knowledge/student/mastery/course")
     public Result getStudentCourseKnowledgeMastery(
             @RequestParam Long studentId,
             @RequestParam Integer courseId) {
@@ -184,7 +184,7 @@ public class KnowledgePointController {
      * 获取学生所有知识点掌握情况
      */
     @Operation(summary = "获取学生所有知识点掌握情况")
-    @GetMapping("/student/knowledge/mastery/all")
+    @GetMapping("/knowledge/student/mastery/all")
     public Result getStudentAllKnowledgeMastery(@RequestParam Long studentId) {
         log.info("获取学生所有知识点掌握情况，studentId：{}", studentId);
         List<Map<String, Object>> masteryList = knowledgePointService.getStudentAllKnowledgeMastery(studentId);
